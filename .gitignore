@@ -1,0 +1,14 @@
+nginx/certs/*
+!nginx/certs/.gitkeep
+pam/*
+!pam/.gitkeep
+nginx/cache/*
+!nginx/cache/.gitkeep
+nginx/conf/*
+!nginx/conf/.gitkeep
+*.env
+
+logs/*
+!logs/.gitkeep
+
+.idea
