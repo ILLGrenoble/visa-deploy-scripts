@@ -36,7 +36,6 @@ services:
     image: illgrenoble/visa-api-server:${VISA_VERSION:-2.0.0}
     restart: always
     volumes:
-      - ./pam:/etc/visa/certs
       - /var/log/visa:/var/log/visa
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
@@ -63,18 +62,9 @@ services:
     image: illgrenoble/visa-accounts:${VISA_VERSION:-2.0.0}
     restart: always
     volumes:
-      - ./providers/ill-keycloak-provider.js:/app/accountAttributeProviders/ill-keycloak-provider.js
+      - ./providers/attribute-provider.js:/app/accountAttributeProviders/attribute-provider.js
     ports:
       - 8089:8089
     environment:
       - VISA_ACCOUNTS_SERVER_PORT=8089
-    env_file: .env
-
-  security-groups:
-    image: docker.ill.fr/visa/visa-security-groups:${VISA_VERSION:-2.0.0}
-    restart: always
-    ports:
-      - 8090:8090
-    environment:
-      - VISA_SECURITY_GROUPS_SERVER_PORT=8090
     env_file: .env

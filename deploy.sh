@@ -8,8 +8,7 @@ usage() {
 	echo "  -n   or --nginx-conf <path>      VISA_NGINX_CONF        set the nginx configuration file location (optional)"
 	echo "  -sk  or --ssl-key <path>         VISA_SSL_KEY           set the SSL key location"
 	echo "  -sc  or --ssl-crt <path>         VISA_SSL_CRT           set the SSL certificate location"
-	echo "  -ppr or --pam-private <path>     VISA_PAM_PRIVATE       set the PAM module private key location"
-	echo "  -ppu or --pam-public <path>      VISA_PAM_PUBLIC        set the PAM module public key location"
+	echo "  -p   or --provider                                      set the account provider file location"
 	echo "  -r   or --restart                                       restart all the docker images"
 }
 
@@ -43,20 +42,14 @@ case $key in
 	shift
 	;;
 
-	-ppr|--pam-private)
-	VISA_PAM_PRIVATE_KEY="$2"
-	shift
-	shift
-	;;
-
-	-ppu|--pam-public)
-	VISA_PAM_PUBLIC_KEY="$2"
-	shift
-	shift
-	;;
-
 	-r|--restart)
 	RESTART_DOCKER_IMAGES=1
+	shift
+	;;
+
+	-p|--provider)
+	VISA_ACCOUNT_PROVIDER_FILE="$2"
+	shift
 	shift
 	;;
 
@@ -68,8 +61,6 @@ done
 
 SSL_CRT_LOCATION=nginx/certs/web.crt
 SSL_KEY_LOCATION=nginx/certs/web.key
-PAM_PUBLIC_LOCATION=pam/public.pem
-PAM_PRIVATE_LOCATION=pam/private.pem
 NGINX_CONF_LOCATION=nginx/conf/nginx.conf
 
 # Verify SSL key/certificate parameters
@@ -85,23 +76,6 @@ if [[ ( ! -z "$VISA_SSL_KEY" || -f "$SSL_KEY_LOCATION" ) && ( ! -z "$VISA_SSL_CR
 	fi
 else
 	echo "You need to specify the SSL key/crt locations"
-	usage
-	exit
-fi
-
-# Verify PAM public/private keys parameters
-if [[ ( ! -z "$VISA_PAM_PRIVATE_KEY" || -f "$PAM_PRIVATE_LOCATION" ) && ( ! -z "$VISA_PAM_PUBLIC_KEY" || -f "$PAM_PUBLIC_LOCATION" ) ]]; then
-  # Verify files exist
-	if [[ ! -z "$VISA_PAM_PRIVATE_KEY" && ! -f "$VISA_PAM_PRIVATE_KEY" ]]; then
-		echo "PAM module private key not found at $VISA_PAM_PRIVATE_KEY"
-		exit
-	fi
-	if [[ ! -z "$VISA_PAM_PUBLIC_KEY" && ! -f "$VISA_PAM_PUBLIC_KEY" ]]; then
-		echo "PAM module public key not found at $VISA_PAM_PUBLIC_KEY"
-		exit
-	fi
-else
-	echo "You need to specify the PAM module public and private key locations"
 	usage
 	exit
 fi
@@ -128,6 +102,19 @@ if [ ! -z "$VISA_NGINX_CONF" ]; then
 	fi
 fi
 
+# Verify visa accounts provider file
+if [ ! -z "$VISA_ACCOUNT_PROVIDER_FILE" ]; then
+  # Verify files exist
+	if [ ! -f "$VISA_ACCOUNT_PROVIDER_FILE" ]; then
+		echo "account provider file not found at $VISA_NGINX_CONF"
+		exit
+	fi
+else
+	echo "You need to specify the account provider file location"
+	usage
+	exit
+fi
+
 # copy SSL key/certificate
 if [ ! -z "$VISA_SSL_KEY" ]; then
 	echo "Copying web.key from $VISA_SSL_KEY"
@@ -138,20 +125,16 @@ if [ ! -z "$VISA_SSL_CRT" ]; then
 	cp "$VISA_SSL_CRT" "$SSL_CRT_LOCATION"
 fi
 
-# copy PAM public/private keys
-if [ ! -z "$VISA_PAM_PRIVATE_KEY" ]; then
-	echo "Copying PAM module private key from $VISA_PAM_PRIVATE_KEY"
-	cp "$VISA_PAM_PRIVATE_KEY" "$PAM_PRIVATE_LOCATION"
-fi
-if [ ! -z "$VISA_PAM_PUBLIC_KEY" ]; then
-	echo "Copying PAM module public key from $VISA_PAM_PUBLIC_KEY"
-	cp "$VISA_PAM_PUBLIC_KEY" "$PAM_PUBLIC_LOCATION"
-fi
-
 # Copy the env file
 if [ ! -z "$VISA_ENV_FILE" ]; then
 	echo "Copying .env file from $VISA_ENV_FILE"
 	cp "$VISA_ENV_FILE" .env
+fi
+
+# Copy the provider file
+if [ ! -z "$VISA_ACCOUNT_PROVIDER_FILE" ]; then
+	echo "Copying account-provider.js file from $VISA_ACCOUNT_PROVIDER_FILE"
+	cp "$VISA_ACCOUNT_PROVIDER_FILE" providers/attribute-provider.js
 fi
 
 # Copy nginx.conf
@@ -170,17 +153,10 @@ if [ "$RESTART_DOCKER_IMAGES" == 1 ]; then
 	docker-compose --env-file .env down
 fi
 
-# Stop current containers if restart
-if [ "$RESTART_DOCKER_IMAGES" == 1 ]; then
-	echo "Restarting all docker images"
-	docker-compose --env-file .env down
-fi
-
 # Pull latest images
 docker-compose --env-file .env pull
 
 # Run new containers
-# docker-compose --env-file .env up --force-recreate -d
 docker-compose --env-file .env up -d
 
 # prune all unused images
