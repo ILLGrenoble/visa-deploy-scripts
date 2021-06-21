@@ -45,7 +45,6 @@ services:
     env_file: .env
     links:
       - accounts
-      - security-groups
 
   jupyter-proxy:
     image: illgrenoble/visa-jupyter-proxy:${VISA_VERSION:-2.0.0}

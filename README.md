@@ -37,4 +37,3 @@ Options and equivalent environment variables:"
 
 ## Optionnal parts
 - create a micro service for security groups, and add it to docker-compose.yml
-- configure PAM modules

@@ -106,7 +106,7 @@ fi
 if [ ! -z "$VISA_ACCOUNT_PROVIDER_FILE" ]; then
   # Verify files exist
 	if [ ! -f "$VISA_ACCOUNT_PROVIDER_FILE" ]; then
-		echo "account provider file not found at $VISA_NGINX_CONF"
+		echo "account provider file not found at $VISA_ACCOUNT_PROVIDER_FILE"
 		exit
 	fi
 else
