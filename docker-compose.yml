@@ -29,11 +29,11 @@ services:
       - jupyter-proxy
       
   web:
-    image: illgrenoble/visa-web:${VISA_VERSION:-2.0.1}
+    image: illgrenoble/visa-web:${VISA_VERSION:-2.0.2}
     restart: always
 
   api:
-    image: illgrenoble/visa-api-server:${VISA_VERSION:-2.0.1}
+    image: illgrenoble/visa-api-server:${VISA_VERSION:-2.0.2}
     restart: always
     volumes:
       - /var/log/visa:/var/log/visa
@@ -47,7 +47,7 @@ services:
       - accounts
 
   jupyter-proxy:
-    image: illgrenoble/visa-jupyter-proxy:${VISA_VERSION:-2.0.1}
+    image: illgrenoble/visa-jupyter-proxy:${VISA_VERSION:-2.0.2}
     restart: always
     links:
       - api
@@ -58,7 +58,7 @@ services:
     env_file: .env
 
   accounts:
-    image: illgrenoble/visa-accounts:${VISA_VERSION:-2.0.1}
+    image: illgrenoble/visa-accounts:${VISA_VERSION:-2.0.2}
     restart: always
     volumes:
       - ./providers/attribute-provider.js:/app/accountAttributeProviders/attribute-provider.js
