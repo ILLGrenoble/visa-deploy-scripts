@@ -8,6 +8,9 @@ networks:
       config:
       - subnet: 10.10.11.1/24
 
+volumes:
+  migrations: {}
+
 services:
   # Use dbmate if you want to automatically apply DB migrations when starting the services
   # dbmate:
@@ -48,6 +51,7 @@ services:
       - /var/log/visa:/var/log/visa
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
+      - migrations:/app/db/migrations
     environment:
       - VISA_SERVER_PORT=8086
       - VISA_VDI_PORT=8087
