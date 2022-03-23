@@ -9,6 +9,15 @@ networks:
       - subnet: 10.10.11.1/24
 
 services:
+  # Use dbmate if you want to automatically apply DB migrations when starting the services
+  # dbmate:
+  #   image: amacneil/dbmate:1
+  #   environment:
+  #     - DATABASE_URL=postgresql:<username>:<password>@<database_host>:5432/<database>?search_path=<schema>
+  #   entrypoint:  ["/usr/local/bin/dbmate", "--no-dump-schema", "up"]
+  #   volumes:
+  #     - migrations:/db/migrations:ro
+
   proxy:
     image: nginx:1.21.1
     restart: always
@@ -29,11 +38,11 @@ services:
       - jupyter-proxy
       
   web:
-    image: illgrenoble/visa-web:${VISA_VERSION:-2.1}
+    image: illgrenoble/visa-web:${VISA_VERSION:-2.2.0}
     restart: always
 
   api:
-    image: illgrenoble/visa-api-server:${VISA_VERSION:-2.1}
+    image: illgrenoble/visa-api-server:${VISA_VERSION:-2.2.0}
     restart: always
     volumes:
       - /var/log/visa:/var/log/visa
@@ -47,7 +56,7 @@ services:
       - accounts
 
   jupyter-proxy:
-    image: illgrenoble/visa-jupyter-proxy:${VISA_VERSION:-2.1}
+    image: illgrenoble/visa-jupyter-proxy:${VISA_VERSION:-2.2.0}
     restart: always
     links:
       - api
@@ -58,7 +67,7 @@ services:
     env_file: .env
 
   accounts:
-    image: illgrenoble/visa-accounts:${VISA_VERSION:-2.1}
+    image: illgrenoble/visa-accounts:${VISA_VERSION:-2.2.0}
     restart: always
     volumes:
       - ./providers/attribute-provider.js:/app/accountAttributeProviders/attribute-provider.js
